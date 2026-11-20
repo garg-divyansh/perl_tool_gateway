@@ -1,0 +1,43 @@
+{
+  "name": "perl-tool-gateway",
+  "version": "1.0.0",
+  "description": "A deny-by-default authorisation gateway that decides whether an AI assistant's proposed tool call is permitted.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --passWithNoTests",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --passWithNoTests",
+    "security-check": "npm audit --omit=dev --audit-level=low && npm audit --audit-level=critical && (command -v gitleaks >/dev/null 2>&1 && gitleaks git --staged -v || echo 'gitleaks not installed, skipping local secret scan (CI still runs TruffleHog)')",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "authorization",
+    "tool-calling",
+    "ai-agents",
+    "zod",
+    "typescript"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@jest/globals": "^30.5.2",
+    "@types/node": "^22.19.0",
+    "eslint": "^10.4.0",
+    "husky": "^9.1.7",
+    "jest": "^30.5.2",
+    "ts-jest": "^29.4.15",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.73.0"
+  }
+}
