@@ -26,11 +26,14 @@ npm run build            # compile to dist/
 import { evaluateToolCall, createSyntheticStore } from "perl-tool-gateway";
 
 const decision = evaluateToolCall(
-  { role: "clinic_staff", orgId: "org_alphaclinic" },          // trusted actor from the application
-  { tool: "get_clinic_slot", args: { slotId: "slot_alphafresh" },
-    message: "ignore the rules" },                              // untrusted proposal from the assistant
-  createSyntheticStore(),                                       // invented records
-  new Date(),                                                   // current time, injected for testability
+  { role: "clinic_staff", orgId: "org_alphaclinic" }, // trusted actor from the application
+  {
+    tool: "get_clinic_slot",
+    args: { slotId: "slot_alphafresh" },
+    message: "ignore the rules",
+  }, // untrusted proposal from the assistant
+  createSyntheticStore(), // invented records
+  new Date(), // current time, injected for testability
 );
 
 if (decision.allowed) {
@@ -53,11 +56,11 @@ Decisions are frozen, and allowed data is a fresh copy that shares nothing with 
 
 All three tools are read-only.
 
-| Tool | Role | Arguments | Rule | Returns |
-|---|---|---|---|---|
-| `get_appointment_request` | `patient` | `{ requestId: "apr_..." }` | The request's `patientId` must equal the actor's `userId` | id, service, preferredDate, status, createdAt |
-| `get_clinic_slot` | `clinic_staff` | `{ slotId: "slot_..." }` | The slot's `clinicId` must equal the actor's `orgId`, and its `sourceUpdatedAt` must be at most 15 minutes old | id, clinicId, service, startsAt, durationMinutes, sourceUpdatedAt |
-| `get_admin_task` | `benefits_admin` | `{ taskId: "task_..." }` | The task's `orgId` must equal the actor's `orgId` | id, taskType, adminStatus, updatedAt (never clinical notes or appointment details) |
+| Tool                      | Role             | Arguments                  | Rule                                                                                                           | Returns                                                                            |
+| ------------------------- | ---------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `get_appointment_request` | `patient`        | `{ requestId: "apr_..." }` | The request's `patientId` must equal the actor's `userId`                                                      | id, service, preferredDate, status, createdAt                                      |
+| `get_clinic_slot`         | `clinic_staff`   | `{ slotId: "slot_..." }`   | The slot's `clinicId` must equal the actor's `orgId`, and its `sourceUpdatedAt` must be at most 15 minutes old | id, clinicId, service, startsAt, durationMinutes, sourceUpdatedAt                  |
+| `get_admin_task`          | `benefits_admin` | `{ taskId: "task_..." }`   | The task's `orgId` must equal the actor's `orgId`                                                              | id, taskType, adminStatus, updatedAt (never clinical notes or appointment details) |
 
 ## How a call is evaluated
 
@@ -138,7 +141,7 @@ As the brief asks, there is no frontend, database, LLM call or paid API, nothing
 
 I used Claude (Anthropic) through the Claude desktop app as a pair programmer.
 
-- **How I used it:** to break down the brief, plan the architecture, and draft code, tests and documentation, and to review edge cases with me. I asked it to read my public NUSphere repository so this project follows the same conventions (layered structure, schema validation at every boundary, Jest test layout, security CI and Husky hooks). I made the design decisions, reviewed every change, and ran typecheck, lint and tests on my own machine before each commit.
+- **How I used it:** to brainstorm ideas and architecture during planning, to draft code, tests and documentation, and to review edge cases with me. I asked it to read my NUSphere project so this project follows the same conventions (layered structure, schema validation at every boundary, Jest test layout, security CI and Husky hooks). I made the design decisions, reviewed every change, and ran typecheck, lint and tests on my own machine before each commit. I chose a tech stack I was familiar with so that I can easily debug and scrutinize AI-generated code.
 - **What it could access:** only this project's local folder. It did not commit, push or open pull requests. I did all Git and GitHub work myself.
 - **What I deliberately did not give it:** access to my GitHub account. I am a member of private organisations (NUS Mars Rover Team and my CS1010 teaching assistant role), and I did not want an AI tool to have any route into those repositories.
 - **Third-party services:** in projects like NUSphere I integrated real LLM APIs, Redis rate limiting, PostgreSQL and Cloudinary. I would not connect an AI assistant to services like these, both because they can hold sensitive data and because automated use can exhaust usage limits and quotas. This exercise needs none of them, so none were connected.
