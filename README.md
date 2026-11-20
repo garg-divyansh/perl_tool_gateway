@@ -18,6 +18,7 @@ npm run test:coverage    # run tests with the 100% coverage gate
 npm run lint             # ESLint (typescript-eslint, strict type-checked)
 npm run typecheck        # tsc --noEmit
 npm run build            # compile to dist/
+npm run demo             # build, then print the gateway's decision for 9 sample calls
 ```
 
 ## Usage
@@ -107,6 +108,16 @@ Any unexpected error at any step becomes `INTERNAL_ERROR`. The function never th
 
 **One generic "not found" instead of precise errors.** When a record does not exist and when it belongs to another user or organisation, the gateway returns the same `RECORD_NOT_FOUND` denial. This stops anyone (or a manipulated assistant) from probing IDs to learn which records exist in other tenants, which matters for healthcare data. The cost is debuggability: a clinic user who mistypes an ID and one who targets another clinic see the same message, and so does a developer chasing a bug. In production I would keep the uniform response but write the precise reason to an internal audit log that only operators can read.
 
+## Future work
+
+If this gateway sat in front of a real assistant, these are the next things I would build:
+
+- **Audit log of every decision.** Keep the uniform `RECORD_NOT_FOUND` response for callers, but record the actor, tool, record ID and precise internal reason in an append-only log that only operators can read. That removes the debugging cost of the trade-off above and makes probing attempts visible.
+- **One schema for the model and the gateway.** Generate the assistant's tool definitions from the same Zod schemas with `z.toJSONSchema()`, so the model is told exactly the argument shapes the gateway accepts and the two can never drift apart.
+- **An HTTP layer.** Wrap the function in an endpoint where the actor comes from a verified session or JWT rather than the request body, with Helmet, per-actor rate limiting and request size limits, as I did in NUSphere.
+- **Policy as reviewable data.** Move the role and ownership rules into a declarative policy file that a compliance reviewer can read without reading code, with a test generated for every rule.
+- **Refreshing instead of only denying.** For stale slots, trigger a refresh from the clinic's scheduling system and retry, so staff see current availability instead of an error.
+
 ## Testing
 
 418 tests across unit and integration suites, with 100% statement, branch, function and line coverage enforced in CI.
@@ -121,6 +132,7 @@ Any unexpected error at any step becomes `INTERNAL_ERROR`. The function never th
 src/
 ├── gateway.ts                  evaluateToolCall: the decision pipeline
 ├── index.ts                    public API
+├── demo.ts                     npm run demo: prints decisions for sample calls
 ├── types.ts                    domain types
 ├── config/
 │   ├── constants.ts            freshness window, clock skew, ID formats
